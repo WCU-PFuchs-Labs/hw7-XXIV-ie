@@ -5,8 +5,9 @@ import java.util.Random;
 public class GPTree implements Collector {
     private Node root;
     private ArrayList<Node> crossNodes;
+
+
     public void collect(Node node) {
-        // add node if not terminal leaf
         if (!node.isLeaf()) {
             crossNodes.add(node);
         }
@@ -30,13 +31,11 @@ public class GPTree implements Collector {
     }
 
     public void crossover(GPTree tree, Random rand){
-        // find the points for crossover
         this.traverse();
         tree.traverse();
         int thisPoint = rand.nextInt(this.crossNodes.size());
         int treePoint = rand.nextInt(this.crossNodes.size());
         boolean left = rand.nextBoolean();
-        // get connection points
         Node thisTrunk = crossNodes.get(thisPoint);
         Node treeTrunk = tree.crossNodes.get(treePoint);
 
