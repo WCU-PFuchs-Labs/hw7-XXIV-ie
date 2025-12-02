@@ -1,39 +1,83 @@
 import java.util.Random;
 
-public class Node {
+/**
+ * Code Template Author: David G. Cooper
+ * Purpose: A Binary Tree class for Arithmetic evaluation
+ */
+public class Node implements Cloneable {
     private Node left;
     private Node right;
-    private Op op;
+    private Op operation;
     private int depth;
 
-    public Node(Binop op, Node left, Node right) {
-        this.left = left;
-        this.right = right;
-        this.op = op;
+    public Node(Unop operation) {
+        this.operation = operation;
         this.depth = 0;
     }
 
-    public Node(Unop op){
-        this.op = op;
-        this.left = null;
-        this.right = null;
+    public Node(Op operation) {
+        this.operation = operation;
         this.depth = 0;
     }
 
-    public Node(Binop op) {
-        this.op = op;
-        this.left = null;
-        this.right = null;
+    public Node(Binop operation, Node left, Node right) {
+        this.operation = operation;
         this.depth = 0;
+        attachLeft(left);
+        attachRight(right);
     }
 
-    public double eval(double [] values) {
-        if (op instanceof Unop) {
-            return ((Unop) op).eval(values);
+    private void attachLeft(Node child) {
+        this.left = child;
+        if (child != null) {
+            child.setDepth(this.depth + 1);
+        }
+    }
+
+    private void attachRight(Node child) {
+        this.right = child;
+        if (child != null) {
+            child.setDepth(this.depth + 1);
+        }
+    }
+
+    public int getDepth() {
+        return this.depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
+    }
+
+    public void addRandomKids(NodeFactory nf, int maxDepth, Random rand) {
+        if (!(operation instanceof Binop)) {
+            return;
+        }
+
+        if (this.depth == maxDepth) {
+            attachLeft(nf.getTerminal(rand));
+            attachRight(nf.getTerminal(rand));
+            return;
+        }
+
+        int choiceRange = nf.getNumOps() + nf.getNumIndepVars();
+
+        int pickLeft = rand.nextInt(choiceRange + 1);
+        if (pickLeft < nf.getNumOps()) {
+            Node L = nf.getOperator(rand);
+            attachLeft(L);
+            L.addRandomKids(nf, maxDepth, rand);
         } else {
-            double leftVal = left.eval(values);
-            double rightVal = right.eval(values);
-            return ((Binop) op).eval(leftVal, rightVal);
+            attachLeft(nf.getTerminal(rand));
+        }
+
+        int pickRight = rand.nextInt(choiceRange + 1);
+        if (pickRight < nf.getNumOps()) {
+            Node R = nf.getOperator(rand);
+            attachRight(R);
+            R.addRandomKids(nf, maxDepth, rand);
+        } else {
+            attachRight(nf.getTerminal(rand));
         }
     }
 
@@ -42,92 +86,44 @@ public class Node {
         Object o = null;
         try {
             o = super.clone();
+        } catch (CloneNotSupportedException e) {
+            System.out.println("Op can't clone.");
         }
-        catch(CloneNotSupportedException e) {
-            System.out.println("Not cloneable");
-        }
-        return 0;
-    }
-
-    public void addRandomKids (NodeFactory factory, int maxDepth, Random rand) {
-        if (op instanceof Unop) {
-            return;
-        }
-
-        if (this.depth == maxDepth) {
-            this.left = factory.getTerminal(rand);
-            this.left.setDepth(this.depth + 1);
-
-            this.right = factory.getTerminal(rand);
-            this.right.setDepth(this.depth + 1);
-            return;
-        }
-
-        int numOps = factory.getNumOps();
-        int numIndepVars = factory.getNumIndepVars();
-
-        int leftChoice = rand.nextInt(numOps + numIndepVars);
-        if (leftChoice < numOps) {
-            this.left = factory.getOperator(rand);
-            this.left.setDepth(this.depth + 1);
-            this.left.addRandomKids(factory, maxDepth, rand);
-        } else {
-            this.left = factory.getTerminal(rand);
-            this.left.setDepth(this.depth + 1);
-        }
-
-        int rightChoice = rand.nextInt(numOps + numIndepVars);
-        if (rightChoice < numOps) {
-            this.right = factory.getOperator(rand);
-            this.right.setDepth(this.depth + 1);
-            this.right.addRandomKids(factory, maxDepth, rand);
-        } else {
-            this.right = factory.getTerminal(rand);
-            this.right.setDepth(this.depth + 1);
-        }
-    }
-
-    public void traverse(Collector c) {
-        c.collect(this);
-
+        Node b = (Node) o;
         if (left != null) {
-            left.traverse(c);
+            b.left = (Node) left.clone();
         }
         if (right != null) {
-            right.traverse(c);
+            b.right = (Node) right.clone();
         }
+        if (operation != null) {
+            b.operation = (Op) operation.clone();
+        }
+        return b;
     }
 
-    public void swapLeft(Node trunk) {
-        Node temp = this.left;
-        this.left = trunk.left;
-        trunk.left = temp;
-    }
-
-    public void swapRight(Node trunk) {
-        Node temp = this .right;
-        this.right = trunk.right;
-        trunk.right = temp;
-    }
-
-    public boolean isLeaf() {
-        return op instanceof Unop;
-    }
-
-
-    public String toString() {
-        if (op instanceof Unop) {
-            return op.toString();
+    public double eval(double[] values) {
+        if (operation instanceof Unop) {
+            return ((Unop) operation).eval(values);
+        } else if (operation instanceof Binop) {
+            double leftVal = left.eval(values);
+            double rightVal = right.eval(values);
+            return ((Binop) operation).eval(leftVal, rightVal);
         } else {
-            return "(" + left.toString() + op.toString() + right.toString() + ")";
+            System.err.println("Error operation is not a Unop or a Binop!");
+            return 0.0;
         }
     }
 
-    public void setDepth(int depth) {
-        this.depth = depth;
-    }
-
-    public int getDepth() {
-        return this.depth;
+    @Override
+    public String toString() {
+        if (operation instanceof Unop) {
+            return operation.toString();
+        }
+        if (operation instanceof Binop) {
+            return "(" + left.toString() + " " + operation.toString() + " " + right.toString() + ")";
+        } else {
+            return "";
+        }
     }
 }
