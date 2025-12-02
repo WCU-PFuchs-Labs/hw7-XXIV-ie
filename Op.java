@@ -1,5 +1,3 @@
-package Binary;
-
 /**
  * Code Template Author: David G. Cooper
  * Purpose: Tha base class for operations
