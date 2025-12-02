@@ -1,5 +1,3 @@
-package Binary;
-
 import java.util.Random;
 
 public class Node {
