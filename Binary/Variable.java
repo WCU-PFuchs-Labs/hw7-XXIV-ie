@@ -1,5 +1,3 @@
-package Binary;
-
 public class Variable extends Unop {
     private int index;
 
