@@ -1,5 +1,3 @@
-package Binary;
-
 public class Variable extends Unop {
     private int index;
 
@@ -14,6 +12,6 @@ public class Variable extends Unop {
 
     @Override
     public String toString() {
-        return "X" + index;
+        return "x" + index;
     }
 }
