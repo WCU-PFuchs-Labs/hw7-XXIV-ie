@@ -1,5 +1,3 @@
-package Binary;
-
 public class Minus extends Binop {
     public double eval(double left, double right) {
        double difference = left - right;
