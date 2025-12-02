@@ -77,23 +77,51 @@ public class Node {
         }
     }
 
-    public Object clone() {
-    Object o = null;
-    try {
-        o = super.clone();
-    } catch (CloneNotSupportedException e) {
-        return null;
+    public double eval(double[] values) {
+        if (operation instanceof Unop) {
+            return ((Unop) operation).eval(values);
+        } else if (operation instanceof Binop) {
+            double leftVal = left.eval(values);
+            double rightVal = right.eval(values);
+            return ((Binop) operation).eval(leftVal, rightVal);
+        } else {
+            return 0.0;
+        }
     }
 
-    Node b = (Node) o;
-    if (left != null) {
-        b.left = (Node) left.clone();
+    public String toString() {
+        if (operation instanceof Unop) {
+            return operation.toString();
+        }
+        if (operation instanceof Binop) {
+            return "(" + left.toString() + " " + operation.toString() + " " + right.toString() + ")";
+        }
+        return "";
     }
-    if (right != null) {
-        b.right = (Node) right.clone();
+
+    public void traverse(Collector c) {
+        c.collect(this);
+        if (left != null) {
+            left.traverse(c);
+        }
+        if (right != null) {
+            right.traverse(c);
+        }
     }
-    if (operation != null) {
-        b.operation = (Op) operation.clone();
+
+    public void swapLeft(Node trunk) {
+        Node temp = this.left;
+        this.left = trunk.left;
+        trunk.left = temp;
     }
-    return b;
+
+    public void swapRight(Node trunk) {
+        Node temp = this.right;
+        this.right = trunk.right;
+        trunk.right = temp;
+    }
+
+    public boolean isLeaf() {
+        return (operation instanceof Unop);
+    }
 }
