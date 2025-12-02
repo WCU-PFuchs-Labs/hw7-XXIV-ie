@@ -1,25 +1,26 @@
 import java.util.ArrayList;
+import java.lang.StringBuilder;
 import java.util.Random;
 
 public class GPTree implements Collector {
     private Node root;
     private ArrayList<Node> crossNodes;
-
     public void collect(Node node) {
+        // add node if not terminal leaf
         if (!node.isLeaf()) {
             crossNodes.add(node);
         }
     }
 
-    public void traverse() {
+    public void traverse(){
         crossNodes = new ArrayList<Node>();
         root.traverse(this);
     }
 
     public String getCrossNodes() {
         StringBuilder string = new StringBuilder();
-        int lastIndex = crossNodes.size() - 1;
-        for (int i = 0; i < lastIndex; ++i) {
+        int lastIndex = crossNodes.size() -1;
+        for (int i = 0; i < lastIndex; ++i){
             Node node = crossNodes.get(i);
             string.append(node.toString());
             string.append(";");
@@ -28,28 +29,29 @@ public class GPTree implements Collector {
         return string.toString();
     }
 
-    public void crossover(GPTree tree, Random rand) {
+    public void crossover(GPTree tree, Random rand){
+        // find the points for crossover
         this.traverse();
         tree.traverse();
         int thisPoint = rand.nextInt(this.crossNodes.size());
-        int treePoint = rand.nextInt(tree.crossNodes.size());
+        int treePoint = rand.nextInt(this.crossNodes.size());
         boolean left = rand.nextBoolean();
-
+        // get connection points
         Node thisTrunk = crossNodes.get(thisPoint);
         Node treeTrunk = tree.crossNodes.get(treePoint);
 
-        if (left) {
+        if(left) {
             thisTrunk.swapLeft(treeTrunk);
         } else {
             thisTrunk.swapRight(treeTrunk);
         }
     }
 
-    GPTree() {
+    GPTree () {
         root = null;
     }
 
-    public GPTree(NodeFactory n, int maxDepth, Random rand) {
+    public GPTree (NodeFactory n, int maxDepth, Random rand) {
         root = n.getOperator(rand);
         root.addRandomKids(n, maxDepth, rand);
     }
@@ -58,7 +60,7 @@ public class GPTree implements Collector {
         return root.toString();
     }
 
-    public double eval(double[] data) {
+    public double eval(double [] data) {
         return root.eval(data);
     }
 }
