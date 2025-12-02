@@ -78,9 +78,22 @@ public class Node {
     }
 
     public Object clone() {
-        Object o = null;
-        try {
-            o = super.clone();
-        }
-        catch(CloneNotSupportedException e) {
-            System.out.println("Op can'
+    Object o = null;
+    try {
+        o = super.clone();
+    } catch (CloneNotSupportedException e) {
+        return null;
+    }
+
+    Node b = (Node) o;
+    if (left != null) {
+        b.left = (Node) left.clone();
+    }
+    if (right != null) {
+        b.right = (Node) right.clone();
+    }
+    if (operation != null) {
+        b.operation = (Op) operation.clone();
+    }
+    return b;
+}
